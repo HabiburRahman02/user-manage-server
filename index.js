@@ -40,17 +40,41 @@ async function run() {
             res.send(result);
         })
 
-        app.post('/users', async (req, res) => {
-            const user = req.body;
-           const result = await userCollection.insertOne(user);
+        app.get('/users/:id', async(req,res)=>{
+            const id = req.params.id
+            const query = {_id: new ObjectId(id)}
+            const result = await userCollection.findOne(query);
             res.send(result)
         })
 
-        app.delete('/users/:id', async(req,res)=>{
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            const result = await userCollection.insertOne(user);
+            res.send(result)
+        })
+
+        app.put('/users/:id', async(req,res)=>{
             const id = req.params.id;
-            const query = {_id: new ObjectId(id)}
+            const user = req.body;
+            console.log(user);
+            const filter = {_id: new ObjectId(id)}
+            const options = { upsert: true };
+            const updateUser = {
+                $set: {
+                    name: user.name,
+                    email: user.email,
+                },
+              };
+              const result = await userCollection.updateOne(filter,updateUser,options);
+              res.send(result)
+          
+        })
+
+        app.delete('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
             const result = await userCollection.deleteOne(query)
-           res.send(result);
+            res.send(result);
         })
 
         // Send a ping to confirm a successful connection
